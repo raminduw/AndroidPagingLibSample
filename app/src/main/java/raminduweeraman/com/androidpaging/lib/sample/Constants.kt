@@ -6,4 +6,4 @@ const val API_KEY = "coding-puzzle-client-449cc9d"
 
 const val SEARCH_MANUFACTURE = 1
 const val SEARCH_MAIN_TYPES = 2
-const val SEARCH_BUILD_DATES = 3
+const val SEARCH_BUILD_YEAR = 3

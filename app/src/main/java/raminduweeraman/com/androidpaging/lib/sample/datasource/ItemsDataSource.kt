@@ -5,7 +5,7 @@ import androidx.paging.PageKeyedDataSource
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import raminduweeraman.com.androidpaging.lib.sample.API_KEY
-import raminduweeraman.com.androidpaging.lib.sample.SEARCH_BUILD_DATES
+import raminduweeraman.com.androidpaging.lib.sample.SEARCH_BUILD_YEAR
 import raminduweeraman.com.androidpaging.lib.sample.SEARCH_MAIN_TYPES
 import raminduweeraman.com.androidpaging.lib.sample.SEARCH_MANUFACTURE
 import raminduweeraman.com.androidpaging.lib.sample.api.CarService
@@ -14,21 +14,26 @@ import raminduweeraman.com.androidpaging.lib.sample.api.SearchParams
 import raminduweeraman.com.androidpaging.lib.sample.model.ApiResponse
 import raminduweeraman.com.androidpaging.lib.sample.model.ListItem
 
-class ItemsDataSource (
-    private val carService: CarService,
-    private val  compositeDisposable: CompositeDisposable, private val networkParams: SearchParams
-) : PageKeyedDataSource<Long, ListItem>() {
+class ItemsDataSource(
+    private val carService: CarService, private val compositeDisposable: CompositeDisposable
+) :
+    PageKeyedDataSource<Long, ListItem>() {
 
     val networkState = MutableLiveData<NetworkState>()
-
     val initialLoad = MutableLiveData<NetworkState>()
+    lateinit var searchParams: SearchParams
+    var searchType: Int? = null
+    fun setParams(networkParams: SearchParams, searchType: Int) {
+        this.searchParams = networkParams
+        this.searchType = searchType
+    }
 
-    override fun loadInitial(params: LoadInitialParams<Long>, callback: LoadInitialCallback<Long,ListItem>) {
+    override fun loadInitial(params: LoadInitialParams<Long>, callback: LoadInitialCallback<Long, ListItem>) {
         networkState.postValue(NetworkState.LOADING)
         initialLoad.postValue(NetworkState.LOADING)
 
         compositeDisposable.add(getApiResponse(0, params.requestedLoadSize).subscribe({ data ->
-            callback.onResult(createItemList(data),null,1)
+            callback.onResult(createItemList(data), null, 1)
             networkState.postValue(NetworkState.LOADED)
             initialLoad.postValue(NetworkState.LOADED)
         }, { throwable ->
@@ -38,13 +43,13 @@ class ItemsDataSource (
         }))
     }
 
-    override fun loadAfter(params: LoadParams<Long>, callback: LoadCallback<Long,ListItem>) {
+    override fun loadAfter(params: LoadParams<Long>, callback: LoadCallback<Long, ListItem>) {
         networkState.postValue(NetworkState.LOADING)
-        compositeDisposable.add(getApiResponse(params.key,params.requestedLoadSize).subscribe({ data ->
-            if (data.totalPageCount>params.key) {
-                callback.onResult(createItemList(data),params.key+1)
+        compositeDisposable.add(getApiResponse(params.key, params.requestedLoadSize).subscribe({ data ->
+            if (data.totalPageCount > params.key) {
+                callback.onResult(createItemList(data), params.key + 1)
                 networkState.postValue(NetworkState.LOADED)
-            }else{
+            } else {
                 networkState.postValue(NetworkState.LOADED)
             }
         }, { throwable ->
@@ -52,22 +57,27 @@ class ItemsDataSource (
         }))
     }
 
-    override fun loadBefore(params: LoadParams<Long>, callback: LoadCallback<Long,ListItem>) {
+    override fun loadBefore(params: LoadParams<Long>, callback: LoadCallback<Long, ListItem>) {
         // ignored, since we only ever append to our initial load
     }
 
-    private fun getApiResponse(page :Long, pageSize:Int): Single<ApiResponse> {
-        when (networkParams.searchType) {
+    private fun getApiResponse(page: Long, pageSize: Int): Single<ApiResponse> {
+        when (searchType) {
             SEARCH_MANUFACTURE -> return carService.getManufactures(page, pageSize, API_KEY)
-            SEARCH_MAIN_TYPES -> return carService.getMainTypes(networkParams.manufacture.key,page, pageSize, API_KEY)
-            SEARCH_BUILD_DATES -> return carService.getBuildDates(networkParams.manufacture.key, networkParams.mainType.key, API_KEY)
+            SEARCH_MAIN_TYPES -> return carService.getMainTypes(searchParams.manufacture.key, page, pageSize, API_KEY)
+            SEARCH_BUILD_YEAR -> return carService.getBuildDates(
+                searchParams.manufacture.key,
+                searchParams.mainType.key,
+                API_KEY
+            )
         }
         return carService.getManufactures(page, pageSize, API_KEY)
     }
 
-    private fun createItemList( dataItem: ApiResponse):MutableList<ListItem>{ val mutableList = mutableListOf<ListItem>()
+    private fun createItemList(dataItem: ApiResponse): MutableList<ListItem> {
+        val mutableList = mutableListOf<ListItem>()
         for ((k, v) in dataItem.wkdaMap) {
-            mutableList.add(ListItem(k,v))
+            mutableList.add(ListItem(k, v))
         }
         return mutableList
     }

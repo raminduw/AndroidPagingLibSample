@@ -1,12 +1,13 @@
 package raminduweeraman.com.androidpaging.lib.sample.di
 
 import dagger.Component
-import raminduweeraman.com.androidpaging.lib.sample.ui.BaseFragment
+import io.reactivex.disposables.CompositeDisposable
+import raminduweeraman.com.androidpaging.lib.sample.api.CarService
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [NetModule::class, ViewModelModule::class, RepositoryModule::class, DisposableModule::class])
+@Component(modules = [NetModule::class, DisposableModule::class])
 interface AppComponent {
-    fun inject(searchFragment: BaseFragment)
+    fun getDisposable(): CompositeDisposable
+    fun getService(): CarService
 }
-
