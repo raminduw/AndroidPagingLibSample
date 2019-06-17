@@ -7,7 +7,7 @@ a) AndroidRx2</br>
 b) Dagger2</br>
 c) Retrofit 2</br>
 d) Kotlin</br>
-e) LiveData</br>
+e) LiveData/ViewModel</br>
 f) Paging library</br>
 g) Mockito</br>
 
