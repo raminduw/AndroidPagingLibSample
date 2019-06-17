@@ -11,5 +11,5 @@ e) LiveData</br>
 f) Paging library</br>
 g) Mockito</br>
 
-Strictly followed MVVM architecture. This helps in proper deep Unit testing and code modularity.
+Strictly followed MVVM architecture. This helps in proper deep Unit testing and code modularity.</br>
 1)ItemDataSourceTest.kt -  Unit testing using mockito.
