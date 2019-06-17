@@ -76,7 +76,7 @@ class BuiltYearSearchActivity : BaseActivity() {
         if (networkState?.message != null) {
             errorMessageTextView.text = networkState.message
         }
-        loadingProgressBar.visibility = if (networkState?.status == Status.RUNNING) View.VISIBLE else View.GONE
+        loadingProgressBar.visibility = if (networkState?.status == Status.LOADING) View.VISIBLE else View.GONE
     }
 
     private fun showSearchCarAlert(dataItemViewModel: DataItemViewModel,item: ListItem) {

@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.paging.PageKeyedDataSource
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import raminduweeraman.com.androidpaging.lib.sample.API_KEY
 import raminduweeraman.com.androidpaging.lib.sample.SEARCH_BUILD_YEAR
 import raminduweeraman.com.androidpaging.lib.sample.SEARCH_MAIN_TYPES
@@ -15,46 +16,26 @@ import raminduweeraman.com.androidpaging.lib.sample.model.ApiResponse
 import raminduweeraman.com.androidpaging.lib.sample.model.ListItem
 
 class ItemsDataSource(
-    private val carService: CarService, private val compositeDisposable: CompositeDisposable
-) :
+    private val carService: CarService, private val compositeDisposable: CompositeDisposable) :
     PageKeyedDataSource<Long, ListItem>() {
 
     val networkState = MutableLiveData<NetworkState>()
     val initialLoad = MutableLiveData<NetworkState>()
+
     lateinit var searchParams: SearchParams
     var searchType: Int? = null
-    fun setParams(networkParams: SearchParams, searchType: Int) {
-        this.searchParams = networkParams
+    fun setParams(searchParams: SearchParams, searchType: Int) {
+        this.searchParams = searchParams
         this.searchType = searchType
     }
 
     override fun loadInitial(params: LoadInitialParams<Long>, callback: LoadInitialCallback<Long, ListItem>) {
-        networkState.postValue(NetworkState.LOADING)
-        initialLoad.postValue(NetworkState.LOADING)
-
-        compositeDisposable.add(getApiResponse(0, params.requestedLoadSize).subscribe({ data ->
-            callback.onResult(createItemList(data), null, 1)
-            networkState.postValue(NetworkState.LOADED)
-            initialLoad.postValue(NetworkState.LOADED)
-        }, { throwable ->
-            val error = NetworkState.error(throwable.message)
-            networkState.postValue(error)
-            initialLoad.postValue(error)
-        }))
+        compositeDisposable.add(loadInitialsData(params, callback))
     }
 
     override fun loadAfter(params: LoadParams<Long>, callback: LoadCallback<Long, ListItem>) {
-        networkState.postValue(NetworkState.LOADING)
-        compositeDisposable.add(getApiResponse(params.key, params.requestedLoadSize).subscribe({ data ->
-            if (data.totalPageCount > params.key) {
-                callback.onResult(createItemList(data), params.key + 1)
-                networkState.postValue(NetworkState.LOADED)
-            } else {
-                networkState.postValue(NetworkState.LOADED)
-            }
-        }, { throwable ->
-            networkState.postValue(NetworkState.error(throwable.message))
-        }))
+        var k = params.key
+        compositeDisposable.add(loadAfterData(k, params.requestedLoadSize, callback))
     }
 
     override fun loadBefore(params: LoadParams<Long>, callback: LoadCallback<Long, ListItem>) {
@@ -80,6 +61,34 @@ class ItemsDataSource(
             mutableList.add(ListItem(k, v))
         }
         return mutableList
+    }
+
+    fun loadInitialsData(params: LoadInitialParams<Long>, callback: LoadInitialCallback<Long, ListItem>): Disposable {
+        networkState.postValue(NetworkState.LOADING)
+        initialLoad.postValue(NetworkState.LOADING)
+        return getApiResponse(0, params.requestedLoadSize).subscribe({ data ->
+            callback.onResult(createItemList(data), null, 1)
+            networkState.postValue(NetworkState.LOADED)
+            initialLoad.postValue(NetworkState.LOADED)
+        }, { throwable ->
+            val error = NetworkState.error(throwable.message)
+            networkState.postValue(error)
+            initialLoad.postValue(error)
+        })
+    }
+
+    fun loadAfterData(key: Long, requestedLoadSize: Int, callback: LoadCallback<Long, ListItem>): Disposable {
+        networkState.postValue(NetworkState.LOADING)
+        return getApiResponse(key, requestedLoadSize).subscribe({ data ->
+            if (data.totalPageCount > key) {
+                callback.onResult(createItemList(data), key + 1)
+                networkState.postValue(NetworkState.LOADED)
+            } else {
+                networkState.postValue(NetworkState.LOADED)
+            }
+        }, { throwable ->
+            networkState.postValue(NetworkState.error(throwable.message))
+        })
     }
 
 }

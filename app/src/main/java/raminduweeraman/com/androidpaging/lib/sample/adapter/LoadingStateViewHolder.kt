@@ -19,7 +19,7 @@ class LoadingStateViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         if (networkState?.message != null) {
             itemView.errorMessageTextView.text = networkState.message
         }
-        itemView.loadingProgressBar.visibility = if (networkState?.status == Status.RUNNING) View.VISIBLE else View.GONE
+        itemView.loadingProgressBar.visibility = if (networkState?.status == Status.LOADING) View.VISIBLE else View.GONE
     }
 
     companion object {
