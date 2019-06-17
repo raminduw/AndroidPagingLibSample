@@ -9,5 +9,7 @@ c) Retrofit 2</br>
 d) Kotlin</br>
 e) LiveData</br>
 f) Paging library</br>
+g) Mockito</br>
 
 Strictly followed MVVM architecture. This helps in proper deep Unit testing and code modularity.
+1)ItemDataSourceTest.kt -  Unit testing using mockito.
