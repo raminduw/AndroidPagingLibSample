@@ -60,7 +60,7 @@ class ManufactureSearchActivity : BaseActivity() {
         dataItemViewModel.getInitialLoadState().observe(this, Observer<NetworkState> { setInitialLoadingState(it) })
     }
 
-    private fun setInitialLoadingState(networkState: NetworkState?) {
+     fun setInitialLoadingState(networkState: NetworkState?) {
         errorMessageTextView.visibility = if (networkState?.message != null) View.VISIBLE else View.GONE
         if (networkState?.message != null) {
             errorMessageTextView.text = networkState.message

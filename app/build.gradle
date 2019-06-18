@@ -65,6 +65,24 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     //MOCKITO
-    testImplementation 'org.mockito:mockito-inline:2.13.0'
+    testImplementation 'org.mockito:mockito-inline:2.18.3'
+    androidTestImplementation "org.mockito:mockito-android:2.18.3"
+
+    //TESTING
     testImplementation "android.arch.core:core-testing:1.1.1"
+    testImplementation 'junit:junit:4.12'
+
+    androidTestImplementation ("androidx.test.espresso:espresso-core:$espresso") {
+        exclude module: 'support-annotations'
+    }
+    androidTestImplementation ("androidx.test.espresso:espresso-intents:$espresso") {
+        exclude module: 'support-annotations'
+    }
+
+    androidTestImplementation ('androidx.test:runner:1.1.0') {
+        exclude module: 'support-annotations'
+    }
+    androidTestImplementation ('androidx.test:rules:1.1.0') {
+        exclude module: 'support-annotations'
+    }
 }
